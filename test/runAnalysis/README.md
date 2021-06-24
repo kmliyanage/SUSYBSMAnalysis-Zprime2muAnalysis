@@ -25,3 +25,4 @@ Note that the appropriate generator filter are added to the cmssw config based o
 
 To check on crab jobs, resubmit failed jobs and harvest and merge output of succesful jobs, just run crabController.py
  
+e.g: python runAnalysis.py -d --2018 -r --file /store/data/Run2018C/SingleMuon/MINIAOD/17Sep2018-v1/120000/FAB77E55-E1DE-0D43-A907-BD709A4B2B1D.root
