@@ -403,7 +403,7 @@ data_muons_2018 = [
  	('SingleMuonRun2018A-17Sep2018-v2', '/SingleMuon/Run2018A-17Sep2018-v2/MINIAOD'),
  	('SingleMuonRun2018B-17Sep2018-v1', '/SingleMuon/Run2018B-17Sep2018-v1/MINIAOD'),
  	('SingleMuonRun2018C-17Sep2018-v1', '/SingleMuon/Run2018C-17Sep2018-v1/MINIAOD'),
- 	('SingleMuonRun2018D-22Jan2019-v2', '/SingleMuon/Run2018D-22Jan2019-v2/MINIAOD'),
+# 	('SingleMuonRun2018D-22Jan2019-v2', '/SingleMuon/Run2018D-22Jan2019-v2/MINIAOD'),
 ]
 data_electrons_2017 = [
 	('DoubleEG2017B-31Mar2018-v1', '/DoubleEG/Run2017B-31Mar2018-v1/MINIAOD'),
