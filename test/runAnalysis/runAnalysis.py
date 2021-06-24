@@ -102,7 +102,7 @@ def getCRABCfgWeirdSubmission(name,dataset,fileList):
 from CRABClient.UserUtilities import config
 config = config()
 config.General.requestName = 'dileptonAna_%s'
-config.General.workArea = 'crab'
+config.General.workArea = 'crab_2018'
 config.General.transferLogs = False
 #config.General.instance = 'preprod'
 config.JobType.pluginName = 'Analysis'
@@ -111,8 +111,8 @@ config.JobType.psetName = 'cmssw_cfg.py'
 config.Data.inputDBS = 'global'
 config.Data.publication = False
 config.Data.outputDatasetTag = 'dileptonAna_%s'
-config.Data.outLFNDirBase = '/store/user/jschulte'
-config.Site.storageSite = 'T2_US_Purdue'
+config.Data.outLFNDirBase = '/store/user/kaliyana'
+config.Site.storageSite = 'T2_US_MIT'
 #config.Site.whitelist = ['T2_ES_IFCA','T2_US_MIT','T2_US_UCSD']
 config.Data.userInputFiles = %s
 config.Data.splitting = 'FileBased'
@@ -133,7 +133,7 @@ def getCRABCfg(name,dataset,lumi_mask=""):
 from CRABClient.UserUtilities import config
 config = config()
 config.General.requestName = 'dileptonAna_%s'
-config.General.workArea = 'crab'
+config.General.workArea = 'crab_2018'
 #config.General.instance = 'prod'
 config.JobType.pluginName = 'Analysis'
 config.JobType.psetName = 'cmssw_cfg.py'   
@@ -142,13 +142,13 @@ config.Data.inputDBS = 'global'
 config.Data.publication = False
 config.Data.allowNonValidInputDataset = True
 config.Data.outputDatasetTag = 'dileptonAna_%s'
-config.Data.outLFNDirBase = '/store/user/jschulte/'
+config.Data.outLFNDirBase = '/store/user/kaliyana/'
 #config.Data.ignoreLocality = True
 #config.General.instance = 'preprod' 
-config.Site.storageSite = 'T2_US_Purdue'
+config.Site.storageSite = 'T2_US_MIT'
 #config.JobType.maxMemoryMB  = 4000
 config.JobType.allowUndistributedCMSSW = True
-config.Site.blacklist = ['T2_US_Caltech']
+#config.Site.blacklist = ['T2_US_Caltech']
 %s
 '''
 	data_config='''
@@ -178,20 +178,20 @@ def getCRABCfgAAA(name,dataset,lumi_mask=""):
 from CRABClient.UserUtilities import config
 config = config()
 config.General.requestName = 'dileptonAna_%s'
-config.General.workArea = 'crab'
+config.General.workArea = 'crab_2018'
 config.JobType.pluginName = 'Analysis'
 config.JobType.psetName = 'cmssw_cfg.py'   
 config.Data.inputDataset =  '%s'
 config.Data.inputDBS = 'global'
 config.Data.publication = False
 config.Data.outputDatasetTag = 'dileptonAna_%s'
-config.Data.outLFNDirBase = '/store/user/jschulte/'
-config.Data.ignoreLocality = True
+config.Data.outLFNDirBase = '/store/user/kaliyana/'
+#config.Data.ignoreLocality = True
 config.Data.allowNonValidInputDataset = True
 #config.General.instance = 'preprod' 
-config.Site.whitelist = ["T2_US_*"]
-config.Site.blacklist = ['T2_US_Caltech']
-config.Site.storageSite = 'T2_US_Purdue'
+#config.Site.whitelist = ["T2_US_*"]
+#config.Site.blacklist = ['T2_US_Caltech']
+config.Site.storageSite = 'T2_US_MIT'
 #config.JobType.maxMemoryMB  = 4000
 config.JobType.allowUndistributedCMSSW = True
 %s
@@ -262,10 +262,11 @@ def main():
 		args.do2016 = True
 
 	isMC = "True"
-	#GT = "94X_mc2017_realistic_v14"
-	GT = "94X_mc2017_realistic_v17"
+	GT = "94X_mc2017_realistic_v14"
+    	#GT = "94X_mc2017_realistic_v17"
 	if args.data:
-		GT = "94X_dataRun2_v11"
+        	GT = "94X_dataRun2_ReReco_EOY17_v6"
+        	#GT = "94X_dataRun2_v11"
 		isMC = 'False'
 	arguments = {}
 	arguments["GT"] = GT
@@ -279,9 +280,11 @@ def main():
 			GT = '80X_dataRun2_2016SeptRepro_v6'
 	if args.do2018:
 		arguments["year"] = 2018
-		GT = '102X_upgrade2018_realistic_v18'
+        	GT = '102X_upgrade2018_realistic_v15'
+        	#GT = '102X_upgrade2018_realistic_v18'
 		if not isMC:
-			GT = '102X_dataRun2_Sep2018ABC_v2'
+			GT = '102X_dataRun2_Sep2018Rereco_v1'
+            		#GT = '102X_dataRun2_Sep2018ABC_v2'
 	
 	prefix = "muons_"	
 	cmssw_cfg = open('setup.py').read()
@@ -326,6 +329,7 @@ def main():
 			from samples import data_electrons_2016 as samples
 		else:
 			from samples import data_electrons_2017 as samples
+
 	elif args.electrons and not args.data:
 		if args.ci2017:	
 			from samples import ci_electrons_2017 as samples
@@ -345,6 +349,7 @@ def main():
 			from samples import backgrounds_electrons_2018 as samples
 		else:
 			from samples import backgrounds_electrons_2017 as samples
+
 	elif args.data:
 		if args.do2018:
 			from samples import data_muons_2018 as samples
@@ -352,6 +357,7 @@ def main():
 			from samples import data_muons_2016 as samples
 		else:
 			from samples import data_muons_2017 as samples
+
 	else:
 		if args.ci2017:
 			from samples import ci_muons_2017 as samples 
@@ -407,6 +413,7 @@ def main():
 	GT = "94X_mc2017_realistic_v14"
 	if args.add2016:
 		GT = "80X_mcRun2_asymptotic_2016_TrancheIV_v6"
+
 	if args.data:
 		if args.electrons: 
 			lumi_mask = "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions17/13TeV/ReReco/Cert_294927-306462_13TeV_EOY2017ReReco_Collisions17_JSON.txt"
@@ -417,11 +424,15 @@ def main():
 
 		else:
 			lumi_mask = "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions17/13TeV/ReReco/Cert_294927-306462_13TeV_EOY2017ReReco_Collisions17_JSON_MuonPhys.txt"
+            		GT = "94X_dataRun2_ReReco_EOY17_v6"
+                
 			if args.do2018:
 				lumi_mask = "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions18/13TeV/ReReco/Cert_314472-325175_13TeV_17SeptEarlyReReco2018ABC_PromptEraD_Collisions18_JSON_MuonPhys.txt"
+                		GT = '102X_dataRun2_Sep2018Rereco_v1'
+                		#GT = '102X_dataRun2_Prompt_v11' # 2018DATA D
 			if args.do2016:
 				lumi_mask = "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions16/13TeV/ReReco/Final/Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON_MuonPhys.txt"
-		GT = "94X_dataRun2_ReReco_EOY17_v6"
+
 
 
 #			lumi_mask = '/afs/cern.ch/work/j/jschulte/test/CMSSW_10_2_15_patch1/src/SUSYBSMAnalysis/Zprime2muAnalysis/test/runAnalysis/crab/crab_dileptonAna_muons_2016_SingleMuonRun2016B-23Sep2016_v3/results/notFinishedLumis.json'
@@ -610,3 +621,4 @@ def main():
 
 
 main()
+
