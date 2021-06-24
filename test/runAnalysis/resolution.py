@@ -4,10 +4,13 @@ Electrons = False
 from SUSYBSMAnalysis.Zprime2muAnalysis.ResolutionAtZ_cfi import ResolutionAtZ
 ResolutionAtZ.leptonsFromDileptons = True
 ResolutionAtZ.doQoverP = True
+ResolutionAtZ.use_vertex_mass = cms.bool(True)
 
 from SUSYBSMAnalysis.Zprime2muAnalysis.ResolutionUsingMC_cfi import ResolutionUsingMC_MiniAOD as ResolutionUsingMC
 ResolutionUsingMC.leptonsFromDileptons = True
 ResolutionUsingMC.doQoverP = True
+ResolutionUsingMC.use_vertex_mass = cms.bool(True)
+
 
 
 ####################################
@@ -33,10 +36,40 @@ ZSkim = False #### Set TRUE to skim dy50to120 with a Z pt < 100 GeV #####
 import SUSYBSMAnalysis.Zprime2muAnalysis.OurSelectionNew_cff as OurSelectionNew
 import SUSYBSMAnalysis.Zprime2muAnalysis.OurSelection2016_cff as OurSelection2016
 import SUSYBSMAnalysis.Zprime2muAnalysis.OurSelection2017_cff as OurSelection2017
+import SUSYBSMAnalysis.Zprime2muAnalysis.OurSelection2018_cff as OurSelection2018
 
 
+# Since the prescaled trigger comes with different prescales in
+# different runs/lumis, this filter prescales it to a common factor to
+# make things simpler.
 
 
+if year == 2016:
+    prescaled_trigger_match = prescaled_trigger_match_2016
+    prescaled_trigger_filters = prescaled_trigger_filters_16
+    prescaled_trigger_path_names = prescaled_trigger_path_names_16
+    prescaled_trigger_path_full_names = prescaled_trigger_path_full_names_16
+    prescale_common_path_name_list = prescaled_trigger_path_name_list_16
+    overall_prescale = overall_prescale_2016
+elif year == 2017 or (year==2018 and (sampleName == "WW200to600" or sampleName == "WW600to1200" or sampleName == "WW1200to2500" or sampleName == "WW2500" or sampleName == "ttbar_lep_500to800_ext" or sampleName == "ttbar_lep_500to800" or sampleName == "ttbar_lep_800to1200" or sampleName == "ttbar_lep_1200to1800" or sampleName == "ttbar_lep_1800toInf" or "CI" in sampleName)):
+    prescaled_trigger_match = prescaled_trigger_match_2018
+    prescaled_trigger_filters = prescaled_trigger_filters_18
+    prescaled_trigger_path_names = prescaled_trigger_path_names_18
+    prescaled_trigger_path_full_names = prescaled_trigger_path_full_names_18
+    prescale_common_path_name_list = prescaled_trigger_path_name_list_17
+    overall_prescale = overall_prescale_2017
+else:
+    prescaled_trigger_match = prescaled_trigger_match_2018
+    prescaled_trigger_filters = prescaled_trigger_filters_18
+    prescaled_trigger_path_names = prescaled_trigger_path_names_18
+    prescaled_trigger_path_full_names = prescaled_trigger_path_full_names_18
+    prescale_common_path_name_list = prescaled_trigger_path_name_list_18
+    overall_prescale = overall_prescale_2018
+
+process.load('SUSYBSMAnalysis.Zprime2muAnalysis.PrescaleToCommon_cff')
+
+process.PrescaleToCommonMiniAOD.trigger_paths = prescale_common_path_name_list
+process.PrescaleToCommonMiniAOD.overall_prescale = overall_prescale # 500 for 2018
 
 
 # CandCombiner includes charge-conjugate decays with no way to turn it
@@ -54,7 +87,8 @@ dils = [('MuonsPlusMuonsMinus',          '%(leptons_name)s:muons@+ %(leptons_nam
 # filter somewhere below.
 
 cuts = {
-	'Our2017'  : OurSelection2017,
+	'Our2017'  : OurSelection2018,
+    'Our2017MuPrescaled'  : OurSelection2018 ,
 	}
 if year == 2016:
 	cuts = {
@@ -62,6 +96,11 @@ if year == 2016:
 		'Our2017'  : OurSelection2017,
 		}
 
+if year == 2018:
+    cuts = {
+        'Our2018'  : OurSelection2018,
+        'Our2018MuPrescaled'  : OurSelection2018,
+    }
 
 tracks = ["Inner","Global","Outer","TPFMS","DYT","Picky","TunePNew"]
 # Loop over all the cut sets defined and make the lepton, allDilepton
@@ -83,11 +122,11 @@ for trackType in tracks:
             leptons_name = cut_name + 'Leptons' + trackType
 	    if cut_name == 'Simple':
 		muon_cuts = ''
-#	    elif 'MuPrescaled' in cut_name:
-#	    muon_cuts = Selection.loose_cut.replace('pt > %s' % offline_pt_threshold, 'pt > 20')
-#	    print muon_cuts
-#	    else:
-	    muon_cuts = Selection.loose_cut
+	    elif 'MuPrescaled' in cut_name:
+	        muon_cuts = Selection.loose_cut.replace('pt > %s' % offline_pt_threshold, 'pt > %s' % prescaled_offline_pt_threshold)
+	        print muon_cuts
+	    else:
+	        muon_cuts = Selection.loose_cut
 
 	    leptons = process.leptonsMini.clone(muon_cuts = muon_cuts)
 	    leptons.muon_track_for_momentum = cms.string(trackType)
@@ -100,16 +139,20 @@ for trackType in tracks:
 	    if  Electrons:
 		    if cut_name == 'EmuVeto':
 			    leptons.electron_muon_veto_dR = 0.1
-	    if len(trigger_filters)>0 and (cut_name=='Our2017' or cut_name=='Simple'):
-		leptons.trigger_filters = trigger_filters
-		leptons.trigger_path_names = trigger_path_names
-		leptons.prescaled_trigger_filters = prescaled_trigger_filters
-		leptons.prescaled_trigger_path_names = prescaled_trigger_path_names
+
+	    if len(trigger_filters)>0 and (cut_name=='Our2017' or cut_name=='Our2017MuPrescaled' or cut_name=='Our2017MuPrescaledCommon' or cut_name=='Simple' or cut_name == 'Our2018' or cut_name=='Our2018MuPrescaled' or cut_name=='Our2018MuPrescaledCommon'):
+            	leptons.trigger_filters = trigger_filters
+            	leptons.trigger_path_names = trigger_path_names
+            	leptons.trigger_path_full_names = trigger_path_full_names
+            	leptons.prescaled_trigger_filters = prescaled_trigger_filters_18
+		leptons.prescaled_trigger_path_names = prescaled_trigger_path_names_18
+
 	    if len(trigger_filters)>0 and year == 2016:
-		leptons.trigger_filters = trigger_filters2016
-		leptons.trigger_path_names = trigger_path_names2016
-		leptons.prescaled_trigger_filters = prescaled_trigger_filters
-		leptons.prescaled_trigger_path_names = prescaled_trigger_path_names
+            	leptons.trigger_filters = trigger_filters2016
+            	leptons.trigger_path_names = trigger_path_names2016
+            	leptons.trigger_path_full_names = trigger_path_full_names2016
+            	leptons.prescaled_trigger_filters = prescaled_trigger_filters_16
+		leptons.prescaled_trigger_path_names = prescaled_trigger_path_names_16
 
 
 	    # Keep using old TuneP for past selections
@@ -139,7 +182,7 @@ for trackType in tracks:
 
 		dil = Selection.dimuons.clone(src = cms.InputTag(allname))
 		print trigger_match_2018
-		if len(trigger_filters) >  0 and (cut_name=='Our2017' or cut_name=='Our2016' or cut_name=='Simple'):
+		if len(trigger_filters) >  0 and (cut_name=='Our2018' or cut_name=='Our2017' or cut_name=='Our2016' or cut_name=='Simple'):
 			if year == 2016:
 				alldil.tight_cut = trigger_match_2016
 			else:
@@ -166,9 +209,10 @@ for trackType in tracks:
 			delattr(dil, 'vertex_chi2_max')
 		    if hasattr(dil, 'dpt_over_pt_max'):
 			delattr(dil, 'dpt_over_pt_max')
+
 		elif 'MuPrescaled' in cut_name:
 			alldil.loose_cut = alldil.loose_cut.value().replace('pt > %s' % offline_pt_threshold, 'pt > %s' % prescaled_offline_pt_threshold)
-			assert alldil.tight_cut == trigger_match
+			
 			if len(prescaled_trigger_filters)>0:
 				alldil.tight_cut = prescaled_trigger_match_2018
 			else:
@@ -192,10 +236,11 @@ for trackType in tracks:
 
 	    # Finally, make the path for this set of cuts.
 	    pathname = 'path' + cut_name + trackType
-	    process.load('SUSYBSMAnalysis.Zprime2muAnalysis.DileptonPreselector_cfi')
+    	    process.load('SUSYBSMAnalysis.Zprime2muAnalysis.DileptonPreselector_cfi')
+        
 	    process.load("SUSYBSMAnalysis.Zprime2muAnalysis.EventCounter_cfi")
-	    process.dileptonPreseletor.ptCut = cms.double(20)	
-	    pobj = process.EventCounter * process.dileptonPreseletor *  process.muonPhotonMatchMiniAOD * reduce(lambda x,y: x*y, path_list)
+	    process.dileptonPreselector.ptCut = cms.double(20)	
+	    pobj = process.EventCounter * process.dileptonPreselector *  process.muonPhotonMatchMiniAOD * reduce(lambda x,y: x*y, path_list)
 
 
 
@@ -217,3 +262,4 @@ for trackType in tracks:
 if isMC:
 	switch_reco_process_name(process, "PAT") # this must be done last (i.e. after anything that might have an InputTag for something HLT-related)
     #switch_hlt_process_name(process, hlt_process_name) # this must be done last (i.e. after anything that might have an InputTag for something HLT-related)
+
