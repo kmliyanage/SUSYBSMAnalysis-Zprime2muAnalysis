@@ -161,7 +161,7 @@ config.Data.lumiMask = '%s'
 	mc_config='''
 config.Data.splitting = 'EventAwareLumiBased'
 config.Data.totalUnits = -1
-config.Data.unitsPerJob  = 500000
+config.Data.unitsPerJob  = 5000
 '''
 	if lumi_mask =="":
 		result = crab_cfg%(name,dataset,name,mc_config)
@@ -207,7 +207,7 @@ config.Data.lumiMask = '%s'
 	mc_config='''
 config.Data.splitting = 'EventAwareLumiBased'
 config.Data.totalUnits = -1
-config.Data.unitsPerJob  = 500000
+config.Data.unitsPerJob  = 5000
 '''
 	if lumi_mask =="":
 		result = crab_cfg%(name,dataset,name,mc_config)
@@ -410,7 +410,8 @@ def main():
 
 
 	lumi_mask = ""
-	GT = "94X_mc2017_realistic_v14"
+	#GT = "94X_mc2017_realistic_v14"
+
 	if args.add2016:
 		GT = "80X_mcRun2_asymptotic_2016_TrancheIV_v6"
 
@@ -433,7 +434,8 @@ def main():
 			if args.do2016:
 				lumi_mask = "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions16/13TeV/ReReco/Final/Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON_MuonPhys.txt"
 
-
+	arguments["GT"] = GT
+	arguments["isMC"] = isMC
 
 #			lumi_mask = '/afs/cern.ch/work/j/jschulte/test/CMSSW_10_2_15_patch1/src/SUSYBSMAnalysis/Zprime2muAnalysis/test/runAnalysis/crab/crab_dileptonAna_muons_2016_SingleMuonRun2016B-23Sep2016_v3/results/notFinishedLumis.json'
 	for dataset_name,  dataset in samples:
@@ -621,4 +623,3 @@ def main():
 
 
 main()
-
